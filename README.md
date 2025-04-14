@@ -82,6 +82,3 @@ python code/statistical_evaluations.py --output_dir "path/to/output" --n_samples
 ## Notes
 - Replace `"path/to/..."` with the actual paths to your input data and desired output directories.
 - The default paths for input and output files are specified in each script. If no arguments are provided, the scripts will use these defaults.
-
-## License
-This project is for educational purposes and is licensed under the MIT License.
