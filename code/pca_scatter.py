@@ -1,12 +1,26 @@
+import argparse
 import pandas as pd
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+import os
 
+if __name__ == "__main__":
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description="PCA scatter plot for wine dataset.")
+    parser.add_argument("--data_path", type=str, default="../wine_data_scaled.csv", help="Path to the input scaled data file.")
+    parser.add_argument("--output_dir", type=str, default="../figures", help="Directory to save the output figure.")
+    args = parser.parse_args()
 
+    # Use parsed arguments
+    data_path = args.data_path
+    output_dir = args.output_dir
 
-if __name__=="__main__":
+    # Ensure the output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
     # Load scaled data
-    df_scaled = pd.read_csv("../wine_data_scaled.csv")
+    print(f"📂 Loading data from: {data_path}")
+    df_scaled = pd.read_csv(data_path)
 
     # Apply PCA and reduce to 2D for visualization
     pca = PCA(n_components=2)
@@ -22,5 +36,7 @@ if __name__=="__main__":
     plt.tight_layout()
 
     # Save figure
-    plt.savefig("../figures/pca_scatter_plot.png")
+    output_path = os.path.join(output_dir, "pca_scatter_plot.png")
+    plt.savefig(output_path)
+    print(f"📁 Figure saved to: {output_path}")
     plt.show()

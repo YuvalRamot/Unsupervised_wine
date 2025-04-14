@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
+import os
 
 if __name__ == "__main__":
     # Set up argument parser
@@ -11,10 +12,21 @@ if __name__ == "__main__":
     parser.add_argument("--perplexity", type=float, default=30.0, help="Perplexity for t-SNE.")
     parser.add_argument("--n_iter", type=int, default=500, help="Number of iterations for t-SNE.")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility.")
+    parser.add_argument("--data_path", type=str, default="../wine_data_scaled.csv", help="Path to the input scaled data file.")
+    parser.add_argument("--output_dir", type=str, default="../figures", help="Directory to save the output figures.")
     args = parser.parse_args()
+
+    # Use parsed arguments
     random_state = args.seed
+    data_path = args.data_path
+    output_dir = args.output_dir
+
+    # Ensure the output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
     # Load scaled data
-    X_scaled = pd.read_csv("../wine_data_scaled.csv")
+    print(f"📂 Loading data from: {data_path}")
+    X_scaled = pd.read_csv(data_path)
 
     # Run t-SNE directly on scaled data (no PCA)
     tsne = TSNE(n_components=2, perplexity=args.perplexity, init='pca', n_iter=args.n_iter, random_state=random_state)
@@ -31,5 +43,7 @@ if __name__ == "__main__":
     plt.xlabel("t-SNE Component 1")
     plt.ylabel("t-SNE Component 2")
     plt.tight_layout()
-    plt.savefig("../figures/tsne_kmeans.png")
+    output_path = os.path.join(output_dir, "tsne_kmeans.png")
+    plt.savefig(output_path)
+    print(f"📁 Figure saved to: {output_path}")
     plt.show()

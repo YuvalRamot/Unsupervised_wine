@@ -1,13 +1,27 @@
+import argparse
 import pandas as pd
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
+if __name__ == "__main__":
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description="PCA analysis for wine dataset.")
+    parser.add_argument("--data_path", type=str, default="../wine_data_scaled.csv", help="Path to the input scaled data file.")
+    parser.add_argument("--output_dir", type=str, default="../figures", help="Directory to save the output figure.")
+    args = parser.parse_args()
 
-if __name__=="__main__":
+    # Use parsed arguments
+    data_path = args.data_path
+    output_dir = args.output_dir
+
+    # Ensure the output directory exists
+    os.makedirs(output_dir, exist_ok=True)
 
     # Step 1: Load the scaled data
-    df_scaled = pd.read_csv("../wine_data_scaled.csv")
+    print(f"📂 Loading data from: {data_path}")
+    df_scaled = pd.read_csv(data_path)
 
     # Step 2: Apply PCA
     pca = PCA()
@@ -22,6 +36,8 @@ if __name__=="__main__":
     plt.grid(True)
     plt.tight_layout()
 
-    # Step 4: Save figure to /figures/ folder
-    plt.savefig("../figures/pca_explained_variance.png")
+    # Step 4: Save figure to the specified output directory
+    output_path = os.path.join(output_dir, "pca_explained_variance.png")
+    plt.savefig(output_path)
+    print(f"📁 Figure saved to: {output_path}")
     plt.show()

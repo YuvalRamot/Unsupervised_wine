@@ -13,15 +13,23 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility.")
     parser.add_argument("--k_range", type=int, nargs=2, default=[1, 11], help="Range of K values for the elbow method (start, end).")
     parser.add_argument("--optimal_k", type=int, default=3, help="Optimal K value for final clustering.")
+    parser.add_argument("--data_path", type=str, default="../wine_data_scaled.csv", help="Path to the input scaled data file.")
+    parser.add_argument("--output_dir", type=str, default="../figures", help="Directory to save the output figures.")
     args = parser.parse_args()
 
     # Use parsed arguments
     random_state = args.seed
     k_start, k_end = args.k_range
     optimal_k = args.optimal_k
+    data_path = args.data_path
+    output_dir = args.output_dir
+
+    # Ensure the output directory exists
+    os.makedirs(output_dir, exist_ok=True)
 
     # === Step 1: Load and Reduce Data ===
-    df_scaled = pd.read_csv("wine_data_scaled.csv")
+    print(f"📂 Loading data from: {data_path}")
+    df_scaled = pd.read_csv(data_path)
 
     # Reduce to 2D using PCA for visualization
     pca = PCA(n_components=2)
@@ -29,9 +37,6 @@ if __name__ == "__main__":
 
     # === Step 2: Elbow Method to Choose K ===
     print("📊 Step 1: Running elbow method to find optimal K...")
-
-    output_dir = "../figures/kmeans_each_K"
-    os.makedirs(output_dir, exist_ok=True)
 
     inertias = []
     K_range = range(k_start, k_end)
@@ -60,7 +65,9 @@ if __name__ == "__main__":
     plt.ylabel("Inertia")
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig("../figures/kmeans_elbow.png")
+    elbow_plot_path = os.path.join(output_dir, "kmeans_elbow.png")
+    plt.savefig(elbow_plot_path)
+    print(f"📁 Elbow plot saved to: {elbow_plot_path}")
     plt.show()
 
     # === Step 3: Apply KMeans with Chosen K ===
@@ -81,12 +88,14 @@ if __name__ == "__main__":
     plt.ylabel("PCA Component 2")
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig("../figures/kmeans_clustered_pca_k{optimal_k}.png")
+    final_plot_path = os.path.join(output_dir, f"kmeans_clustered_pca_k{optimal_k}.png")
+    plt.savefig(final_plot_path)
+    print(f"📁 Final clustering plot saved to: {final_plot_path}")
     plt.show()
 
     # === Step 5: Feature Summary per Cluster ===
     print("\n📊 Feature Summary per Cluster (K-Means)...")
-    df_scaled_full = pd.read_csv("../wine_data_scaled.csv")  # Reload full scaled features
+    df_scaled_full = pd.read_csv(data_path)  # Reload full scaled features
     df_scaled_full['cluster'] = labels_final
 
     # Define features to show

@@ -1,3 +1,4 @@
+import argparse
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -5,23 +6,38 @@ from sklearn.decomposition import PCA
 from sklearn.cluster import DBSCAN
 from sklearn.metrics import silhouette_score
 from sklearn.neighbors import NearestNeighbors
+import os
 
+if __name__ == "__main__":
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description="DBSCAN clustering on wine dataset.")
+    parser.add_argument("--data_path", type=str, default="../wine_data_scaled.csv", help="Path to the input scaled data file.")
+    parser.add_argument("--eps", type=float, default=0.17, help="Epsilon value for DBSCAN.")
+    parser.add_argument("--min_samples", type=int, default=5, help="Minimum samples for DBSCAN.")
+    parser.add_argument("--output_dir", type=str, default="../figures", help="Directory to save the output figures.")
+    args = parser.parse_args()
 
+    # Use parsed arguments
+    data_path = args.data_path
+    eps_value = args.eps
+    min_samples = args.min_samples
+    output_dir = args.output_dir
 
-if __name__=="__main__":
+    # Ensure the output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
     # === Step 1: Load and Reduce Data ===
-    # Load scaled data
-    df_scaled = pd.read_csv("../wine_data_scaled.csv")
+    print(f"📂 Loading data from: {data_path}")
+    df_scaled = pd.read_csv(data_path)
 
     # Reduce to 2D for clustering and visualization
     pca = PCA(n_components=2)
     X_pca = pca.fit_transform(df_scaled)
 
     # === Step 2: Visualize K-Distance Graph ===
-    # This helps us choose the best eps for DBSCAN
     print("📊 Step 1: Generating k-distance graph...")
 
-    k = 5  # Same as min_samples
+    k = min_samples  # Same as min_samples
     neigh = NearestNeighbors(n_neighbors=k)
     nbrs = neigh.fit(X_pca)
     distances, indices = nbrs.kneighbors(X_pca)
@@ -31,19 +47,17 @@ if __name__=="__main__":
     plt.plot(distances)
     plt.title("K-distance Graph (5th Nearest Neighbor)")
     plt.xlabel("Points sorted by distance")
-    plt.ylabel("5th Nearest Neighbor Distance")
+    plt.ylabel(f"{k}th Nearest Neighbor Distance")
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig("../figures/dbscan_k_distance_explained.png")
+    k_distance_path = os.path.join(output_dir, "dbscan_k_distance_explained.png")
+    plt.savefig(k_distance_path)
+    print(f"📁 K-distance graph saved to: {k_distance_path}")
     plt.show()
 
     print("📌 Choose eps just before the steep rise — typically around the elbow point.\n")
 
     # === Step 3: Apply DBSCAN with chosen eps ===
-    # Based on the graph, set a good eps value:
-    eps_value = 0.17  # <-- update this after viewing the plot
-    min_samples = 5
-
     print(f"🧪 Step 2: Applying DBSCAN with eps = {eps_value}, min_samples = {min_samples}...")
 
     dbscan = DBSCAN(eps=eps_value, min_samples=min_samples)
@@ -82,5 +96,7 @@ if __name__=="__main__":
     plt.ylabel("PCA Component 2")
     plt.legend(fontsize=9)
     plt.tight_layout()
-    plt.savefig("../figures/dbscan_result_explained.png")
+    clustering_result_path = os.path.join(output_dir, "dbscan_result_explained.png")
+    plt.savefig(clustering_result_path)
+    print(f"📁 Clustering result saved to: {clustering_result_path}")
     plt.show()
